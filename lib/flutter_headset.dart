@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 
-enum HeadsetState { connect, disconnect }
+enum HeadsetState { disconnect, connect }
 
 class FlutterHeadset {
   static const MethodChannel _channel = const MethodChannel('flutter_headset');
