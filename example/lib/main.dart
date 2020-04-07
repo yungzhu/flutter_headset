@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-
 import 'package:flutter_headset/flutter_headset.dart';
 
 void main() => runApp(MyApp());

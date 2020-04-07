@@ -1,6 +1,8 @@
 package com.yung.flutter_headset;
 
 import androidx.annotation.NonNull;
+import android.content.Intent;
+import android.content.IntentFilter;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -10,36 +12,50 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /** FlutterHeadsetPlugin */
 public class FlutterHeadsetPlugin implements FlutterPlugin, MethodCallHandler {
+  public static int currentState = 0;
+  private static MethodChannel channel;
+
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    final MethodChannel channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "flutter_headset");
+    channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "flutter_headset");
     channel.setMethodCallHandler(new FlutterHeadsetPlugin());
-  }
-
-  // This static function is optional and equivalent to onAttachedToEngine. It supports the old
-  // pre-Flutter-1.12 Android projects. You are encouraged to continue supporting
-  // plugin registration via this function while apps migrate to use the new Android APIs
-  // post-flutter-1.12 via https://flutter.dev/go/android-project-migration.
-  //
-  // It is encouraged to share logic between onAttachedToEngine and registerWith to keep
-  // them functionally equivalent. Only one of onAttachedToEngine or registerWith will be called
-  // depending on the user's project. onAttachedToEngine or registerWith must both be defined
-  // in the same class.
-  public static void registerWith(Registrar registrar) {
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_headset");
-    channel.setMethodCallHandler(new FlutterHeadsetPlugin());
-  }
-
-  @Override
-  public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-    if (call.method.equals("getPlatformVersion")) {
-      result.success("Android " + android.os.Build.VERSION.RELEASE);
-    } else {
-      result.notImplemented();
-    }
+    HeadsetBroadcastReceiver headsetReceiver = new HeadsetBroadcastReceiver(headsetEventListener);
+    IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+    flutterPluginBinding.getApplicationContext().registerReceiver(headsetReceiver, filter);
   }
 
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+    channel.setMethodCallHandler(null);
+    channel = null;
+  }
+
+  public static void registerWith(Registrar registrar) {
+    channel = new MethodChannel(registrar.messenger(), "flutter_headset");
+    channel.setMethodCallHandler(new FlutterHeadsetPlugin());
+    HeadsetBroadcastReceiver headsetReceiver = new HeadsetBroadcastReceiver(headsetEventListener);
+    IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+    registrar.activeContext().registerReceiver(headsetReceiver, filter);
+  }
+
+  static HeadsetEventListener headsetEventListener = new HeadsetEventListener() {
+    @Override
+    public void onHeadsetConnect() {
+      channel.invokeMethod("connect", "true");
+    }
+
+    @Override
+    public void onHeadsetDisconnect() {
+      channel.invokeMethod("disconnect", "true");
+    }
+  };
+
+  @Override
+  public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
+    if (call.method.equals("getCurrentState")) {
+      result.success(currentState);
+    } else {
+      result.notImplemented();
+    }
   }
 }
