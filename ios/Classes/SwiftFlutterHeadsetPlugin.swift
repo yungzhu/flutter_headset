@@ -15,6 +15,8 @@ public class SwiftFlutterHeadsetPlugin: NSObject, FlutterPlugin {
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         if (call.method == "getCurrentState"){
             result(headsetIsConnect())
+        }else if(call.method == "switchBluetooth"){
+            result(switchBluetooth())
         }
         result("iOS " + UIDevice.current.systemVersion)
     }
@@ -49,10 +51,32 @@ public class SwiftFlutterHeadsetPlugin: NSObject, FlutterPlugin {
                 return 1
             }else if output.portType == AVAudioSession.Port.bluetoothA2DP{
                 return 1
+            }else if output.portType == AVAudioSession.Port.bluetoothHFP{
+                return 1
             }else{
                 return 0;
             }
         }
         return 0
+    }
+
+    func switchBluetooth() -> Bool{
+        if let inputs = AVAudioSession.sharedInstance().availableInputs {  
+            do {
+                for input in inputs {  
+                    if input.portType == AVAudioSession.Port.bluetoothA2DP{
+                        let _ = try? AVAudioSession.sharedInstance().setPreferredInput(input);
+                        return true;
+                    }
+                    else if input.portType == AVAudioSession.Port.bluetoothHFP{
+                        let _ = try? AVAudioSession.sharedInstance().setPreferredInput(input);
+                        return true;
+                    }
+                }  
+            } catch let error {
+                print("SwitchBluetooth error \(error)")
+            }
+        }
+        return false;
     }
 }

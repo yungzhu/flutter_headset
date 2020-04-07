@@ -12,6 +12,11 @@ class FlutterHeadset {
     return HeadsetState.values[state];
   }
 
+  static Future<bool> switchBluetooth() async {
+    final bool res = await _channel.invokeMethod('switchBluetooth');
+    return res;
+  }
+
   static void setListener(void Function(HeadsetState payload) onChanged) {
     FlutterHeadset._onChanged = onChanged;
     _channel.setMethodCallHandler(_methodHandle);

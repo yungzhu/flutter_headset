@@ -44,6 +44,12 @@ class _MyAppState extends State<MyApp> {
         body: Center(
           child: Text('Running on: $_state'),
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            var res = await FlutterHeadset.switchBluetooth();
+            print(res);
+          },
+        ),
       ),
     );
   }
