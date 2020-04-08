@@ -135,14 +135,7 @@ public class SwiftFlutterHeadsetPlugin: NSObject, FlutterPlugin {
                     return
             }
             print("registerAudioRouteChangeBlock \(reason)");
-            self.channel!.invokeMethod("inputChanged",arguments: "true")
-//            switch reason {
-//            case .newDeviceAvailable:
-//                self.channel!.invokeMethod("inputChanged",arguments: "true")
-//            case .oldDeviceUnavailable:
-//                self.channel!.invokeMethod("inputChanged",arguments: "true")
-//            default: ()
-//            }
+            self.channel!.invokeMethod("inputChanged",arguments: 1)
         }
     }
 }

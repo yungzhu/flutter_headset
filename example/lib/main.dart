@@ -10,8 +10,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Input _currentInput = Input("unknow", 0);
-  List<Input> _availableInputs = [];
+  AudioInput _currentInput = AudioInput("unknow", 0);
+  List<AudioInput> _availableInputs = [];
 
   @override
   void initState() {
@@ -54,11 +54,11 @@ class _MyAppState extends State<MyApp> {
               Expanded(
                 child: ListView.builder(
                   itemBuilder: (_, index) {
-                    Input input = _availableInputs[index];
+                    AudioInput input = _availableInputs[index];
                     return Row(
                       children: <Widget>[
                         Expanded(child: Text("${input.name}")),
-                        Expanded(child: Text("${input.type}")),
+                        Expanded(child: Text("${input.port}")),
                       ],
                     );
                   },
@@ -71,7 +71,7 @@ class _MyAppState extends State<MyApp> {
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
             bool res = false;
-            if (_currentInput.type == InputType.receiver) {
+            if (_currentInput.port == AudioPort.receiver) {
               res = await FlutterHeadset.changeToSpeaker();
               print("change to speaker:$res");
             } else {

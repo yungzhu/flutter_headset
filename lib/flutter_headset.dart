@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 
-enum InputType {
+enum AudioPort {
   /// unknow
   unknow,
 
@@ -21,18 +21,18 @@ enum InputType {
   carAudio,
 }
 
-class Input {
+class AudioInput {
   final String name;
-  final int _type;
-  InputType get type {
-    return InputType.values[_type];
+  final int _port;
+  AudioPort get port {
+    return AudioPort.values[_port];
   }
 
-  const Input(this.name, this._type);
+  const AudioInput(this.name, this._port);
 
   @override
   String toString() {
-    return "name:$name,type:$type";
+    return "name:$name,port:$port";
   }
 }
 
@@ -40,18 +40,18 @@ class FlutterHeadset {
   static const MethodChannel _channel = const MethodChannel('flutter_headset');
   static void Function() _onChanged;
 
-  static Future<Input> getCurrentOutput() async {
+  static Future<AudioInput> getCurrentOutput() async {
     final List<dynamic> data = await _channel.invokeMethod('getCurrentOutput');
-    return Input(data[0], int.parse(data[1]));
+    return AudioInput(data[0], int.parse(data[1]));
   }
 
-  static Future<List<Input>> getAvailableInputs() async {
+  static Future<List<AudioInput>> getAvailableInputs() async {
     final List<dynamic> list =
         await _channel.invokeMethod('getAvailableInputs');
 
-    List<Input> arr = [];
+    List<AudioInput> arr = [];
     list.forEach((data) {
-      arr.add(Input(data[0], int.parse(data[1])));
+      arr.add(AudioInput(data[0], int.parse(data[1])));
     });
     return arr;
   }
