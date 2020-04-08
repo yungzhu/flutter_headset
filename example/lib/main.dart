@@ -10,7 +10,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Input _currentInput = Input("none", "none", "none");
+  Input _currentInput = Input("unknow", 0);
   List<Input> _availableInputs = [];
 
   @override
@@ -33,7 +33,9 @@ class _MyAppState extends State<MyApp> {
 
   _getInput() async {
     _currentInput = await FlutterHeadset.getCurrentOutput();
+    print("current:$_currentInput");
     _availableInputs = await FlutterHeadset.getAvailableInputs();
+    print("available $_availableInputs");
   }
 
   @override
@@ -55,9 +57,8 @@ class _MyAppState extends State<MyApp> {
                     Input input = _availableInputs[index];
                     return Row(
                       children: <Widget>[
-                        Expanded(child: Text("${input.uid}")),
                         Expanded(child: Text("${input.name}")),
-                        Expanded(child: Text("${input.port}")),
+                        Expanded(child: Text("${input.type}")),
                       ],
                     );
                   },
@@ -69,8 +70,15 @@ class _MyAppState extends State<MyApp> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            var res = await FlutterHeadset.changeInput(InputType.bluetooth);
-            print(res);
+            bool res = false;
+            if (_currentInput.type == InputType.receiver) {
+              res = await FlutterHeadset.changeToSpeaker();
+              print("change to speaker:$res");
+            } else {
+              res = await FlutterHeadset.changeToReceiver();
+              print("change to receiver:$res");
+            }
+            await _getInput();
           },
         ),
       ),

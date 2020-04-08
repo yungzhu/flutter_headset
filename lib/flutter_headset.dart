@@ -2,28 +2,38 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 enum InputType {
-  /// 内置
-  builtIn,
+  /// unknow
+  unknow,
 
-  /// 外放
+  /// input
+  receiver,
+
+  /// out speaker
   speaker,
 
-  /// 有线耳机
+  /// headset
   headphones,
 
-  /// 蓝牙耳机
+  /// bluetooth
   bluetooth,
 
-  /// 车载
-  car
+  /// car
+  carAudio,
 }
 
 class Input {
-  final String uid;
   final String name;
-  final String port;
-  // final InputType type;
-  const Input(this.uid, this.name, this.port);
+  final int _type;
+  InputType get type {
+    return InputType.values[_type];
+  }
+
+  const Input(this.name, this._type);
+
+  @override
+  String toString() {
+    return "name:$name,type:$type";
+  }
 }
 
 class FlutterHeadset {
@@ -32,30 +42,43 @@ class FlutterHeadset {
 
   static Future<Input> getCurrentOutput() async {
     final List<dynamic> data = await _channel.invokeMethod('getCurrentOutput');
-    print("current: $data");
-    return Input(data[0], data[1], data[2]);
+    return Input(data[0], int.parse(data[1]));
   }
 
   static Future<List<Input>> getAvailableInputs() async {
     final List<dynamic> list =
         await _channel.invokeMethod('getAvailableInputs');
-    print("available: $list");
 
     List<Input> arr = [];
     list.forEach((data) {
-      arr.add(Input(data[0], data[1], data[2]));
+      arr.add(Input(data[0], int.parse(data[1])));
     });
     return arr;
+  }
+
+  static Future<bool> changeToSpeaker() async {
+    return await _channel.invokeMethod('changeToSpeaker');
+  }
+
+  static Future<bool> changeToReceiver() async {
+    return await _channel.invokeMethod('changeToReceiver');
+  }
+
+  static Future<bool> changeToHeadphones() async {
+    return await _channel.invokeMethod('changeToHeadphones');
+  }
+
+  static Future<bool> changeToBluetooth() async {
+    return await _channel.invokeMethod('changeToBluetooth');
+  }
+
+  static Future<bool> changeToCarAudio() async {
+    return await _channel.invokeMethod('changeToCarAudio');
   }
 
   static void setListener(void Function() onChanged) {
     FlutterHeadset._onChanged = onChanged;
     _channel.setMethodCallHandler(_methodHandle);
-  }
-
-  static Future<bool> changeInput(InputType input) async {
-    final bool res = await _channel.invokeMethod('changeInput', input.index);
-    return res;
   }
 
   static Future<void> _methodHandle(MethodCall call) async {
