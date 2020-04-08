@@ -10,7 +10,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  HeadsetState _state = HeadsetState.connect;
+  Input _currentInput = Input("none", "none", "none");
+  List<Input> _availableInputs = [];
 
   @override
   void initState() {
@@ -19,19 +20,20 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> init() async {
-    try {
-      _state = await FlutterHeadset.getCurrentState;
-    } catch (e) {
-      print(e);
-    }
-
-    FlutterHeadset.setListener((state) {
-      _state = state;
+    FlutterHeadset.setListener(() async {
+      print("-----changed-------");
+      await _getInput();
       setState(() {});
     });
 
+    await _getInput();
     if (!mounted) return;
     setState(() {});
+  }
+
+  _getInput() async {
+    _currentInput = await FlutterHeadset.getCurrentOutput();
+    _availableInputs = await FlutterHeadset.getAvailableInputs();
   }
 
   @override
@@ -41,12 +43,33 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text('Running on: $_state'),
+        body: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            children: <Widget>[
+              Text("current output:${_currentInput.name}"),
+              Divider(),
+              Expanded(
+                child: ListView.builder(
+                  itemBuilder: (_, index) {
+                    Input input = _availableInputs[index];
+                    return Row(
+                      children: <Widget>[
+                        Expanded(child: Text("${input.uid}")),
+                        Expanded(child: Text("${input.name}")),
+                        Expanded(child: Text("${input.port}")),
+                      ],
+                    );
+                  },
+                  itemCount: _availableInputs.length,
+                ),
+              ),
+            ],
+          ),
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            var res = await FlutterHeadset.switchBluetooth();
+            var res = await FlutterHeadset.changeInput(InputType.bluetooth);
             print(res);
           },
         ),
