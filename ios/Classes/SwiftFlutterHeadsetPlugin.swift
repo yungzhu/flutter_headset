@@ -105,10 +105,16 @@ public class SwiftFlutterHeadsetPlugin: NSObject, FlutterPlugin {
     }
     
     func changeByPortType(_ portType:AVAudioSession.Port) -> Bool{
+        let currentRoute = AVAudioSession.sharedInstance().currentRoute
+        for output in currentRoute.outputs {
+            if(output.portType == portType){
+                return true;
+            }
+        }
         if let inputs = AVAudioSession.sharedInstance().availableInputs {
             for input in inputs {
                 if(input.portType == portType){
-                    try? AVAudioSession.sharedInstance().setPreferredInput(input);
+                    try?AVAudioSession.sharedInstance().setPreferredInput(input);
                     return true;
                 }
              }
